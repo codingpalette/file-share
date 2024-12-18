@@ -20,7 +20,7 @@ FC는 "Functional Component"의 약자입니다.
 
 export const ButtonVariants = cva(
   `
-    rounded
+    rounded px-[16px] py-[8px] text-sm
   `,
   {
     //variant , size에 따라 다른 디자인을 보여줄수 있다
@@ -31,20 +31,20 @@ export const ButtonVariants = cva(
         outline: 'bg-transparent border border-zinc-700 text-neutral-50',
       },
       size: {
-        smail: 'text-xs px-[7px]',
-        middle: 'text-sm px-[15px] py-[4px]',
-        large: 'text-md px-[15px] py-[7px]',
-        icon: 'w-[38px] h-[38px] flex items-center justify-center'
+        // smail: 'text-xs px-[7px]',
+        // middle: 'text-sm px-[15px] py-[4px]',
+        // large: 'text-md px-[15px] py-[7px]',
+        icon: 'w-[38px] h-[38px] flex items-center justify-center px-[0px] py-[0px]'
       },
     },
     defaultVariants: {
-      size: 'middle',
+      // size: 'middle',
       intent: 'default',
     },
   },
 )
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof ButtonVariants>  {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof ButtonVariants> {
   children?: React.ReactNode; // 버튼 내부에 들어갈 내용
   additionalClass?: string; // 추가 클래스
 }
@@ -60,7 +60,7 @@ export function Button({
   return (
     <>
       <button
-        className={cn('  ', ButtonVariants({ size, intent }), additionalClass)}
+        className={cn(ButtonVariants({ intent, size }), additionalClass)}
         {...props}
       >{children}</button>
     </>
