@@ -1,27 +1,34 @@
+import React, { useState } from "react";
 import { Button, Input, Tooltip } from "@renderer/shared/ui";
-import { HomeIcon, CameraIcon} from '@heroicons/react/24/solid';
-import { PlusIcon} from '@heroicons/react/24/outline';
-import { useState } from "react";
-import { Description, Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-
+import { HomeIcon, CameraIcon } from '@heroicons/react/24/solid';
+import { PlusIcon } from '@heroicons/react/24/outline';
+import { Dialog, DialogPanel, DialogTitle, Description } from "@headlessui/react";
 
 export function SideBar() {
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [roomName, setRoomName] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
 
-  const [isOpen, setIsOpen] = useState(false)
-
-  const [roomName, setRoomName] = useState('');
   const onChangeRoomName = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRoomName(e.target.value);
+    setError(null); // 입력 시 에러 초기화
   }
 
-
   const onClickRoomCreate = async () => {
-    console.log('11111')
-    if (roomName === '') {
-      alert('방 이름을 입력해주세요')
+    // 방 이름 유효성 검사
+    if (roomName.trim() === '') {
+      setError('방 이름을 입력해주세요');
       return;
     }
 
+    try {
+      // Electron API를 통해 방 생성 요청
+      const result = await window.electronAPI.createRoom(roomName);
+      console.log(result)
+    } catch (error) {
+      console.error('방 생성 중 오류:', error)
+      setError('방 생성 중 문제가 발생했습니다.')
+    }
   }
 
   return (
@@ -36,7 +43,6 @@ export function SideBar() {
           </Button>
         </Tooltip>
       </div>
-
       <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="relative z-50">
         <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
           <DialogPanel className="max-w-lg space-y-4 bg-zinc-950 border border-zinc-700 p-8 rounded-md text-neutral-50 w-full">
@@ -52,21 +58,24 @@ export function SideBar() {
               <Input
                 value={roomName}
                 onChange={onChangeRoomName}
+                placeholder="방 이름을 입력하세요"
               />
+              {error && (
+                <p className="text-red-500 mt-2 text-sm">{error}</p>
+              )}
             </div>
             <div className="mt-4 flex justify-between">
-              <Button>취소</Button>
-              <Button intent="primary" onClick={onClickRoomCreate}>만들기</Button>
+              <Button onClick={() => setIsOpen(false)}>취소</Button>
+              <Button
+                intent="primary"
+                onClick={onClickRoomCreate}
+              >
+                만들기
+              </Button>
             </div>
-
-            {/* <div className="flex gap-4"> */}
-            {/*   <button onClick={() => setIsOpen(false)}>Cancel</button> */}
-            {/*   <button onClick={() => setIsOpen(false)}>Deactivate</button> */}
-            {/* </div> */}
           </DialogPanel>
         </div>
       </Dialog>
-
     </>
   )
 }

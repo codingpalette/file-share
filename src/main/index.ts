@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, IpcMainInvokeEvent } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -30,18 +30,33 @@ function createWindow(): void {
     return { action: 'deny' }
   })
 
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  // 앱 초기화시 폴더 생성 이벤트
+  checkAndCreateAppDirectory()
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+function checkAndCreateAppDirectory() {
+  const appDataPath = app.getPath('userData')
+  const appFolder = path.join(appDataPath, 'FileShareApp')
+  if (!fs.existsSync(appFolder)) {
+    fs.mkdirSync(appFolder, { recursive: true })
+    console.log(`앱 데이터 폴더 생성: ${appFolder}`)
+    // 앱 폴더 생성 후 system.json 파일 생성
+    const systemFilePath = path.join(appFolder, 'system.json')
+    fs.writeFileSync(systemFilePath, JSON.stringify({ rooms: [] }, null, 2), 'utf-8')
+
+  }
+}
+
+
+
+
+
 app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
@@ -56,35 +71,62 @@ app.whenReady().then(() => {
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
 
-  ipcMain.on('test', () => {
-    const appDataPath = app.getPath('userData')
-    console.log('test')
-    console.log('appDataPath', appDataPath)
-
-  })
-
-  ipcMain.on('file', () => {
-    const appDataPath = app.getPath('userData')
-    const appFolder = path.join(appDataPath, 'MyElectronApp')
-    if (!fs.existsSync(appFolder)) {
-      fs.mkdirSync(appFolder, { recursive: true })
-      console.log(`앱 데이터 폴더 생성: ${appFolder}`)
-
-    }
-    const jsonData = [
-      {
-        id: '1230593-1029',
-        title: '테스트 데이터'
-      }
-    ];
-    const jsonPath = path.join(appFolder, 'data.json')
+  ipcMain.handle('room', (_event, roomName: string) => {
     try {
-      fs.writeFileSync(jsonPath, JSON.stringify(jsonData, null, 2), 'utf-8')
-      console.log(`파일 생성: ${jsonPath}`)
-    } catch (error) {
-      console.log('error', error)
-    }
+      // 앱데이터 경로 가저오기
+      const appDataPath = app.getPath('userData')
+      const appFolder = path.join(appDataPath, 'FileShareApp')
 
+      // 폴더가 없다면 생성
+      if (!fs.existsSync(appFolder)) {
+        fs.mkdirSync(appFolder, { recursive: true })
+      }
+
+      // 방 이름으로 고유한 폴더 생성
+      const roomFolderName = `${roomName}_${Date.now()}`
+      const roomFolderPath = path.join(appFolder, roomFolderName)
+      fs.mkdirSync(roomFolderPath, { recursive: true })
+
+      // system.json 파일 경로
+      const systemFilePath = path.join(appFolder, 'system.json');
+      let currentData: any = { rooms: [] };
+
+      // 기존 system.json 파일 읽기
+      if (fs.existsSync(systemFilePath)) {
+        const fileContent = fs.readFileSync(systemFilePath, 'utf-8');
+        currentData = JSON.parse(fileContent);
+      }
+
+      // 새로운 방 데이터 생성
+      const roomData = {
+        id: roomFolderName,
+        name: roomName,
+        createdAt: new Date().toISOString(),
+        files: []
+      };
+
+      // 기존 데이터에 새로운 방 데이터 추가
+      currentData.rooms.push(roomData);
+
+      // 업데이트된 데이터를 system.json에 저장
+      fs.writeFileSync(systemFilePath, JSON.stringify(currentData, null, 2), 'utf-8');
+
+      return {
+        success: true,
+        message: '방이 성공적으로 생성되었습니다.',
+        roomData
+      };
+
+
+
+    } catch (error) {
+      console.error('방 생성 중 오류:', error)
+      return {
+        success: false,
+        message: '방 생성에 실패했습니다.',
+        error: error instanceof Error ? error.message : '알 수 없는 오류'
+      }
+    }
   })
 
   createWindow()
