@@ -3,6 +3,7 @@ import { Button, Input, Tooltip } from "@renderer/shared/ui";
 import { HomeIcon, CameraIcon } from '@heroicons/react/24/solid';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { Dialog, DialogPanel, DialogTitle, Description } from "@headlessui/react";
+import { NavLink, Link } from "react-router";
 
 export function SideBar() {
   const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -37,6 +38,12 @@ export function SideBar() {
         <Button size="icon" intent="outline">
           <HomeIcon className="size-6" />
         </Button>
+        <Link to="/room/1">
+          <Button size="icon" intent="outline">
+            <HomeIcon className="size-6" />
+          </Button>
+
+        </Link>
         <Tooltip tooltip="새로추가" position="right" additionalClass="w-[60px]">
           <Button size="icon" intent="outline" onClick={() => setIsOpen(true)}>
             <PlusIcon className="size-6" />
