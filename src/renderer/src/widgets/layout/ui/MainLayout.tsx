@@ -5,7 +5,7 @@ interface MainLayoutProps {
   children: React.ReactNode;
 }
 
-export function MainLayout({children}: MainLayoutProps) {
+export function MainLayout({ children }: MainLayoutProps) {
   return (
     <>
       <div className="pl-[75px]">

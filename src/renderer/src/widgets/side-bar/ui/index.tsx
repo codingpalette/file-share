@@ -4,7 +4,7 @@ import { HomeIcon, CameraIcon } from '@heroicons/react/24/solid';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { Dialog, DialogPanel, DialogTitle, Description } from "@headlessui/react";
 import { NavLink, Link } from "react-router";
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 export function SideBar() {
 

@@ -1,4 +1,4 @@
-import { MainLayout } from "@renderer/widgets/layout"
+import { MainLayout, RoomLayout } from "@renderer/widgets/layout"
 import { useEffect, useState } from "react"
 import { useParams } from "react-router"
 
@@ -34,12 +34,14 @@ export function RoomPage() {
     <>
 
       <MainLayout>
-        <div>RoomPage</div>
-        <div>
-          <h1>{roomInfo?.name}</h1>
-          <p>Created: {roomInfo?.createdAt}</p>
-          {/* Files list can be added here */}
-        </div>
+        <RoomLayout>
+          <div>RoomPage</div>
+          <div>
+            <h1>{roomInfo?.name}</h1>
+            <p>Created: {roomInfo?.createdAt}</p>
+            {/* Files list can be added here */}
+          </div>
+        </RoomLayout>
 
       </MainLayout>
     </>
