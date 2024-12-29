@@ -5,6 +5,8 @@ declare global {
     electron: ElectronAPI
     electronAPI: {
       createRoom: (roomName: string) => Promise<any>
+      getRooms: () => Promise<any>
+      getRoomInfo: (roomId: string) => Promise<any>
     }
     api: unknown
   }

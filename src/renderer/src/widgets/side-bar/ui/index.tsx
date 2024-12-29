@@ -1,14 +1,23 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Input, Tooltip } from "@renderer/shared/ui";
 import { HomeIcon, CameraIcon } from '@heroicons/react/24/solid';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { Dialog, DialogPanel, DialogTitle, Description } from "@headlessui/react";
 import { NavLink, Link } from "react-router";
+import { ToastContainer, toast } from 'react-toastify';
 
 export function SideBar() {
+
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [roomName, setRoomName] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [rooms, setRooms] = useState<any[]>([]);
+
+
+  useEffect(() => {
+    console.log('rooms', rooms)
+
+  }, [rooms])
 
   const onChangeRoomName = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRoomName(e.target.value);
@@ -22,28 +31,55 @@ export function SideBar() {
       return;
     }
 
+
     try {
       // Electron API를 통해 방 생성 요청
       const result = await window.electronAPI.createRoom(roomName);
       console.log(result)
+      toast.success("방 생성에 성공 했습니다.")
+      setRooms([...rooms, result.room])
+      setIsOpen(false)
     } catch (error) {
       console.error('방 생성 중 오류:', error)
       setError('방 생성 중 문제가 발생했습니다.')
     }
   }
 
+
+  useEffect(() => {
+    const start = async () => {
+      try {
+        console.log('getRooms')
+        const result = await window.electronAPI.getRooms();
+        console.log(result)
+        setRooms(result.rooms)
+
+      } catch (error) {
+
+      }
+
+    }
+    start()
+
+  }, [])
+
   return (
     <>
       <div className="w-[75px] h-dvh bg-zinc-950 text-white flex flex-col items-center py-4 gap-4 fixed left-0 top-0">
-        <Button size="icon" intent="outline">
-          <HomeIcon className="size-6" />
-        </Button>
-        <Link to="/room/1">
+        <Link to="/">
           <Button size="icon" intent="outline">
             <HomeIcon className="size-6" />
           </Button>
-
         </Link>
+        {rooms.map((room) => (
+          <Link key={room.id} to={`/room/${room.id}`}>
+            <Button size="icon" intent="outline">
+              {room.name.slice(0, 1)}
+            </Button>
+
+          </Link>
+
+        ))}
         <Tooltip tooltip="새로추가" position="right" additionalClass="w-[60px]">
           <Button size="icon" intent="outline" onClick={() => setIsOpen(true)}>
             <PlusIcon className="size-6" />

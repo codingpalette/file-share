@@ -3,9 +3,6 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
 const api = {
-  aa() {
-    console.log('aa')
-  }
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
@@ -20,6 +17,8 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('electronAPI', {
       // 타입이 지정된 createRoom 메서드
       createRoom: (roomName: string) => ipcRenderer.invoke('room', roomName),
+      getRooms: () => ipcRenderer.invoke('get-rooms'),
+      getRoomInfo: (roomId: string) => ipcRenderer.invoke('get-room-info', roomId),
     })
 
 
@@ -36,13 +35,4 @@ if (process.contextIsolated) {
   window.api = api
 }
 
-
-// 윈도우 객체에 타입 선언을 추가하여 타입 안전성 확보
-// declare global {
-//   interface Window {
-//     electronAPI: {
-//       createRoom: (roomName: string) => Promise<CreateRoomResult>
-//     }
-//   }
-// }
 
